@@ -1,0 +1,7 @@
+*.pyc
+*.log
+*.db
+config.py
+venv/*
+.idea
+run.sh
