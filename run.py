@@ -117,7 +117,7 @@ other_info text, variant text, parts text, km integer, ccm integer, epoch intege
             print err
 
         message = '%s (%s) - %s \n%s \n%s Ekm->%s Ekm/year \n\n%s' \
-                  % (c_head, c_age, car_price, car_desc, c_km/1000, c_km_year/1000, car_url)
+                  % (c_head, c_age, car_price, car_desc, int(c_km/1000), int(c_km_year/1000), car_url)
         if not config.silent_mode:
             notification.pushover(token=config.pushover['token'], api_user=config.pushover['api_user'], message=message)
         print 'New Target!'
