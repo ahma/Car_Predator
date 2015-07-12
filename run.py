@@ -85,42 +85,46 @@ other_info text, variant text, parts text, km integer, ccm integer, epoch intege
 
     for car in cars:
         car_url = str(car['href'])
-        if len(c.execute("SELECT * FROM cars_table WHERE car_url='%s'" % car_url).fetchall()) != 0:
-            continue
-
-
-        car_title = car.img['alt'].encode('utf-8')
-        car_pic = car.img['src'].encode('utf-8')
-        car_desc = car.p.text.encode('utf-8')
-        car_price = car.strong.text.encode('utf-8')
-
-        res_car_info = get_car_info(car_url)
-
-        c_head = str(res_car_info.get('head', ''))
-        c_car_description = str(res_car_info.get('car_description', ''))
-        c_age = str(res_car_info.get('age', ''))
-        c_other_info = str(res_car_info.get('other_info', ''))
-        c_variant = str(res_car_info.get('variant', ''))
-        c_parts = str(res_car_info.get('parts', ''))
-        c_km = res_car_info.get('km', 0)
-        c_ccm = res_car_info.get('ccm', 0)
-        c_epoch = res_car_info.get('epoch', 0)
-        c_hp = res_car_info.get('hp', 0)
-        c_km_year = res_car_info.get('km_year', 0)
-        c_model = str(res_car_info.get('model', ''))
-        c_company = str(res_car_info.get('company', ''))
-
         try:
+            if len(c.execute("SELECT * FROM cars_table WHERE car_url='%s'" % car_url).fetchall()) != 0:
+                continue
+
+
+            car_title = car.img['alt'].encode('utf-8')
+            car_pic = car.img['src'].encode('utf-8')
+            car_desc = car.p.text.encode('utf-8')
+            if car.strong:
+                car_price = car.strong.text.encode('utf-8')
+            else:
+                car_price = ''
+            res_car_info = get_car_info(car_url)
+
+            c_head = str(res_car_info.get('head', ''))
+            c_car_description = str(res_car_info.get('car_description', ''))
+            c_age = str(res_car_info.get('age', ''))
+            c_other_info = str(res_car_info.get('other_info', ''))
+            c_variant = str(res_car_info.get('variant', ''))
+            c_parts = str(res_car_info.get('parts', ''))
+            c_km = res_car_info.get('km', 0)
+            c_ccm = res_car_info.get('ccm', 0)
+            c_epoch = res_car_info.get('epoch', 0)
+            c_hp = res_car_info.get('hp', 0)
+            c_km_year = res_car_info.get('km_year', 0)
+            c_model = str(res_car_info.get('model', ''))
+            c_company = str(res_car_info.get('company', ''))
+
             c.execute("INSERT INTO cars_table VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%d', '%d', '%d', '%s', '%s');"
                       % (car_url, car_title, car_pic, car_desc, car_price, c_head, c_car_description, c_age, c_other_info, c_variant, c_parts, c_km, c_ccm, c_epoch, c_hp, c_km_year, c_model, c_company))
+
+            message = '%s (%s) - %s \n%s \n%s Ekm->%s Ekm/year \n\n%s' \
+                      % (c_head, c_age, car_price, car_desc, int(c_km/1000), int(c_km_year/1000), car_url)
+            if not config.silent_mode:
+                notification.pushover(token=config.pushover['token'], api_user=config.pushover['api_user'], message=message)
+            print 'New Target!'
         except Exception as err:
             print err
+            print car_url
 
-        message = '%s (%s) - %s \n%s \n%s Ekm->%s Ekm/year \n\n%s' \
-                  % (c_head, c_age, car_price, car_desc, int(c_km/1000), int(c_km_year/1000), car_url)
-        if not config.silent_mode:
-            notification.pushover(token=config.pushover['token'], api_user=config.pushover['api_user'], message=message)
-        print 'New Target!'
         sleep(0.2)
 
 
